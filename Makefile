@@ -14,8 +14,6 @@ help:
 
 .PHONY: run ## Run the project
 run:
-	$(MAKE) gen
-	$(MAKE) build
 	@go run cmd/main.go
 
 .PHONY: doctor ## checks if local environment is ready for development
@@ -50,18 +48,34 @@ deps:
 	@echo "Installing dependencies..."
 	@go install github.com/spf13/cobra-cli@latest
 	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+	@echo "Done!"
 
 .PHONY: build ## build the project
 build:
+	$(MAKE) generate
 	@echo "Building..."
 	@go build -o $(EXEC_NAME) ./cmd/main.go
+	@echo "Done!"
 
-.PHONY: gen ## generate server and database code
-gen:
+.PHONY: clean ## delete generated code
+clean:
+	@echo "Deleting generated code..."
+	@rm -rf generated
+	@echo "Done!"
+
+.PHONY: generate ## generate server and database code
+generate:
 	@echo "Generating database models..."
-	@sqlc generate
+	@sqlc generate -f sqlc.yaml
+	@echo "Generating server code..."
+	@mkdir -p generated/api
+	@oapi-codegen -generate types,server -o generated/api/server_gen.go openapi.yaml
+	@echo "Done!"
 
 .PHONY: docker ## build docker image
 docker:
 	@echo "Building docker image..."
 	@docker build -t $(PROJECT_NAME) .
+	@echo "Done!"
+
+# TODO: test, migrate, seed

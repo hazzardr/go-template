@@ -7,6 +7,8 @@
 *.dll
 *.so
 *.dylib
+# gonew template executable
+template
 
 # Test binary, built with `go test -c`
 *.test
@@ -19,3 +21,7 @@
 
 # Go workspace file
 go.work
+.idea/
+
+# Generated
+generated/
