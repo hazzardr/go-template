@@ -14,6 +14,8 @@ help:
 
 .PHONY: run ## Run the project
 run:
+	$(MAKE) generate
+	$(MAKE) build
 	@go run cmd/main.go
 
 .PHONY: doctor ## checks if local environment is ready for development
@@ -36,6 +38,13 @@ doctor:
 		exit 1; \
 	fi
 
+	@if ! command -v docker &> /dev/null; then \
+		echo "`docker` is not installed. Please install it first."; \
+		exit 1; \
+	fi
+	@echo "Local environment OK"
+
+
 .PHONY: deps ## install dependencies used for development
 deps:
 	@echo "Installing dependencies..."
@@ -48,3 +57,11 @@ build:
 	@go build -o $(EXEC_NAME) ./cmd/main.go
 
 .PHONY: generate ## generate server and database code
+generate:
+	@echo "Generating database models..."
+	@sqlc generate
+
+.PHONY: docker ## build docker image
+docker:
+	@echo "Building docker image..."
+	@docker build -t $(PROJECT_NAME) .
