@@ -1,4 +1,4 @@
-module github.com/hazzardr/got
+module github.com/hazzardr/go-template
 
 go 1.21.0
 

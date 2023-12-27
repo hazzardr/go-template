@@ -14,7 +14,7 @@ help:
 
 .PHONY: run ## Run the project
 run:
-	$(MAKE) generate
+	$(MAKE) gen
 	$(MAKE) build
 	@go run cmd/main.go
 
@@ -56,8 +56,8 @@ build:
 	@echo "Building..."
 	@go build -o $(EXEC_NAME) ./cmd/main.go
 
-.PHONY: generate ## generate server and database code
-generate:
+.PHONY: gen ## generate server and database code
+gen:
 	@echo "Generating database models..."
 	@sqlc generate
 
