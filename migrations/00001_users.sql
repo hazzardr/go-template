@@ -1,7 +1,7 @@
 -- +goose Up
 create table users (
-    id bigserial primary key, -- auto incrementing id
-    username varchar(255) not null
+    id integer primary key autoincrement,
+    username text not null
 );
 
 -- +goose Down

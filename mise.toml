@@ -8,9 +8,17 @@ golangci-lint = "2.13.2"
 [env]
 _.file = ".env"
 
-[tasks.run]
+[tasks.serve]
 description = "Run the project"
 run = "go run . serve"
+
+[tasks.bot]
+description = "Runs the Discord Bot"
+run = "go run . bot serve"
+
+[tasks.sync]
+description = "Runs the Discord Bot"
+run = "go run . bot sync"
 
 [tasks.build]
 description = "Builds the project"
@@ -39,12 +47,12 @@ run = "go fmt ./..."
 
 [tasks."db:migrate"]
 description = "Run database migrations"
-run = "goose postgres $DB_URL -dir migrations up"
+run = "mkdir -p $(dirname $DB_URL) && goose sqlite3 $DB_URL -dir migrations up"
 
 [tasks."db:migration:status"]
 description = "Get the status of the db migrations"
-run = "goose postgres $DB_URL -dir migrations status"
+run = "goose sqlite3 $DB_URL -dir migrations status"
 
 [tasks."db:migration:create"]
-description = "Create a new migration: mise run db:migration:create NAME=add_thing"
-run = "goose create $NAME sql -dir migrations"
+description = "Create a new migration: mise run db:migration:create -- NAME sql -dir migrations"
+run = "goose create"

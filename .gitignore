@@ -33,3 +33,6 @@ go.work.sum
 
 # Generated
 generated/
+
+# local sqlite database
+data/
