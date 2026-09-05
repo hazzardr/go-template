@@ -1,28 +1,11 @@
 # go-template
 
-## Tools
-
-### APIs
-* HTTP framework via `labstack/echo`
-* Server codegen via `deepmap/oapi-codegen` from `openapi.yaml`
-
-### Bootstrapping / Config
-* CLI via `Cobra`
-* Config via `Viper`
-
-### Domain and Storage
-* Postgres DB via `pgx`
-* DB Migrations via `go-migrate`
-* DB Codegen via `sqlc`
+Starter template for Go services. See [AGENTS.md](AGENTS.md) for the full
+tech stack, repo layout, and agent operating instructions.
 
 ```bash
-make doctor
-make deps # if required
-make build
-make run
+mise install       # install pinned tools (go, sqlc, goose, golangci-lint, cobra-cli)
+cp .env.example .env
+mise run build
+mise run run
 ```
-
-# TODO: 
-* simple tests
-* .env
-* docker

@@ -1,0 +1,50 @@
+[tools]
+go = "1.25"
+sqlc = "1.31.1"
+golangci-lint = "2.13.2"
+"go:github.com/pressly/goose/v3/cmd/goose" = "3.28.0"
+"go:github.com/spf13/cobra-cli" = "1.3.0"
+
+[env]
+_.file = ".env"
+
+[tasks.run]
+description = "Run the project"
+run = "go run . serve"
+
+[tasks.build]
+description = "Builds the project"
+depends = ["generate"]
+run = "go build -ldflags='-s' -o=./bin/go-template ."
+
+[tasks.generate]
+description = "Generate database code"
+run = "sqlc generate -f sqlc.yaml"
+
+[tasks.clean]
+description = "Delete generated code"
+run = "rm -rf generated bin"
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = "golangci-lint run"
+
+[tasks.test]
+description = "Run tests"
+run = "go test -v ./..."
+
+[tasks.fmt]
+description = "Format the project"
+run = "go fmt ./..."
+
+[tasks."db:migrate"]
+description = "Run database migrations"
+run = "goose postgres $DB_URL -dir migrations up"
+
+[tasks."db:migration:status"]
+description = "Get the status of the db migrations"
+run = "goose postgres $DB_URL -dir migrations status"
+
+[tasks."db:migration:create"]
+description = "Create a new migration: mise run db:migration:create NAME=add_thing"
+run = "goose create $NAME sql -dir migrations"
