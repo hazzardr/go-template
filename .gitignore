@@ -34,5 +34,8 @@ go.work.sum
 # Generated
 generated/
 
+# GoReleaser output
+dist/
+
 # local sqlite database
 data/

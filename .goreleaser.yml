@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# Publishes a release to Forgejo on every tag (.forgejo/workflows/release.yml).
+# Rename "go-template" with the rest of the project: the archive and checksum
+# names below are what deploys install from (README, "Deploying").
+version: 2
+
+project_name: go-template
+
+gitea_urls:
+  api: https://code.brihome.me/api/v1
+  download: https://code.brihome.me
+
+builds:
+  - main: .
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats: ["tar.gz"]
+    # Matches `uname`: go-template_Linux_x86_64.tar.gz, go-template_Linux_arm64.tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+
+# go-template_<version>_checksums.txt (the tag without its "v"), SHA-256
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+release:
+  gitea:
+    owner: brian
+    name: go-template
+
+force_token: gitea
