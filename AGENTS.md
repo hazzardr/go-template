@@ -43,6 +43,7 @@ information relevant to the problem or query, then proceed.
 - `migrations/` — goose migration files (sqlite3 dialect)
 - `generated/` — codegen output; never edit by hand
 - `mise.toml` — pinned tool versions and task definitions
+- `.goreleaser.yml` + `.forgejo/workflows/release.yml` — tag `vX.Y.Z` to publish a Forgejo release (see README, "Releasing")
 - `.env` — local config (copy from `.env.example`; holds `DB_URL`, `DISCORD_TOKEN`)
 
 ## Common tasks
@@ -58,6 +59,8 @@ mise run fmt                        # go fmt
 mise run db:migrate                 # goose migrations up
 mise run db:migration:create -- NAME sql -dir migrations
 mise run db:migration:status
+mise run release:check              # validate .goreleaser.yml
+mise run release:snapshot           # build release archives into dist/
 ```
 
 ## Gotchas
@@ -70,6 +73,12 @@ mise run db:migration:status
 - If generated code fails to compile with missing module errors, the codegen
   pulled in a new dependency: run `go get <module> && go mod tidy`.
 - mise config must be trusted after edits: `mise trust`.
+- Renaming the project from the template: replace `go-template` everywhere,
+  including `.goreleaser.yml` (`project_name`, `release.gitea.name`). Those
+  names become the release asset names deploys depend on.
+- `.github/workflows` only runs on GitHub. Forgejo runs `.forgejo/workflows`
+  instead (it ignores `.github/` once that directory exists), on runners
+  labelled `docker`, with actions referenced by full `https://` URL.
 - `goose` and `cobra-cli` are installed through mise's `go:` backend, not the
   mise registry — don't "fix" them to registry names that don't exist.
 - disgo releases move fast and change APIs between versions — check `go doc

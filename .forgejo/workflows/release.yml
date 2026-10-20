@@ -1,0 +1,39 @@
+# Forgejo runs .forgejo/workflows instead of .github/workflows when this
+# directory exists; GitHub ignores it. Forgejo's runners take `docker`, not
+# `ubuntu-latest`, and actions need full URLs (the default mirror lacks most).
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Release
+    runs-on: docker
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: https://github.com/actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: |
+          go vet ./...
+          go test -race ./...
+
+      - name: Run GoReleaser
+        uses: https://github.com/goreleaser/goreleaser-action@v7
+        with:
+          # Keep in step with goreleaser in mise.toml.
+          version: "v2.6.1"
+          args: release --clean
+        env:
+          # Repo Actions secret: a Forgejo token with write:repository
+          GITEA_TOKEN: ${{ secrets.goreleaser_token }}
