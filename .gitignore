@@ -31,9 +31,6 @@ go.work.sum
 # Editor/IDE
 .idea/
 
-# Generated
-generated/
-
 # GoReleaser output
 dist/
 
