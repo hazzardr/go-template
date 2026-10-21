@@ -14,15 +14,14 @@ mise run run
 ## Releasing
 
 Pushing a `v*` tag runs `.forgejo/workflows/release.yml`, which tests the code
-and publishes a Forgejo release with GoReleaser.
+and publishes a Forgejo release with GoReleaser. It authenticates with the
+job's built-in token, so the repo needs no Actions secret for it.
 
 One-time setup per repo created from this template:
 
 1. Replace `go-template` everywhere, including `project_name` and
    `release.gitea.name` in `.goreleaser.yml`.
-2. Create a Forgejo token with `write:repository` and add it to the repo as
-   the Actions secret `GORELEASER_TOKEN` (Settings → Actions → Secrets).
-3. Check the config: `mise run release:check`, and `mise run release:snapshot`
+2. Check the config: `mise run release:check`, and `mise run release:snapshot`
    to build the archives into `dist/` without publishing.
 
 Then `git tag v0.1.0 && git push origin v0.1.0`.

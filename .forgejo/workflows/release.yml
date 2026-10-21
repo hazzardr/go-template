@@ -35,5 +35,7 @@ jobs:
           version: "v2.6.1"
           args: release --clean
         env:
-          # Repo Actions secret: a Forgejo token with write:repository
-          GITEA_TOKEN: ${{ secrets.goreleaser_token }}
+          # The job's built-in token: write access to this repo only, and it
+          # expires with the job. No repo secret to create. Don't swap in a
+          # personal access token: those can write to every repo you can.
+          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
