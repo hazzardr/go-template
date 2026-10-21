@@ -1,0 +1,74 @@
+# Forgejo runs .forgejo/workflows instead of .github/workflows when this
+# directory exists; GitHub ignores it. Forgejo's runners take `docker`, not
+# `ubuntu-latest`, and actions need full URLs (the default mirror lacks most).
+name: CI
+
+# The one full check run, on the PR. Branch protection on main requires it,
+# blocks outdated PRs and merges fast-forward only, so the commit that lands
+# on main (and later gets tagged) is the exact commit this run tested.
+# release.yml checks this run's status instead of testing again.
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check
+    runs-on: docker
+    # Built on devops (brian/hosted, roles/forgejo/files/go-ci-image): node for
+    # the JS actions plus Go, so there's no setup-go download. Keep its Go
+    # minor in step with go.mod and mise.toml.
+    container:
+      image: localhost/brihome-go-ci:1.27
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@v4
+
+      # Module and build caches, at the image's paths. The key changes only
+      # with go.sum, so code changes rebuild just this repo's packages.
+      - name: Cache Go modules and build output
+        uses: https://github.com/actions/cache@v4
+        with:
+          path: |
+            /go/pkg/mod
+            /root/.cache/go-build
+          key: go-1.27-${{ hashFiles('go.sum') }}
+          restore-keys: go-1.27-
+
+      - name: Build and test
+        run: |
+          go mod download
+          go mod verify
+          go build ./...
+          go vet ./...
+          go test -race ./...
+
+      # Fails when the committed sqlc code in generated/ is out of date with
+      # db/schema.sql and db/query.sql.
+      - name: Set up sqlc
+        uses: https://github.com/sqlc-dev/setup-sqlc@v4
+        with:
+          # Keep in step with sqlc in mise.toml.
+          sqlc-version: "1.31.1"
+
+      - name: Check generated code
+        run: sqlc diff
+
+      - name: Check GoReleaser config
+        uses: https://github.com/goreleaser/goreleaser-action@v7
+        with:
+          # Keep in step with goreleaser in mise.toml and release.yml.
+          version: "v2.6.1"
+          args: check
+
+      - name: Run golangci-lint
+        uses: https://github.com/golangci/golangci-lint-action@v7
+        with:
+          # Keep in step with golangci-lint in mise.toml.
+          version: v2.15.0
+          install-mode: binary
+
+      - name: Run govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...

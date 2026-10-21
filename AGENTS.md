@@ -41,9 +41,9 @@ information relevant to the problem or query, then proceed.
 - `internal/discord/` — disgo bot (`bot.go`: client + command wiring, `ping.go`: slash command). Add new slash commands here + to the `commands` slice, then run `mise exec -- go run . bot sync`
 - `db/` — sqlc schema and queries (source of truth for `sqlc generate`); SQLite
 - `migrations/` — goose migration files (sqlite3 dialect)
-- `generated/` — codegen output; never edit by hand
+- `generated/` — codegen output, committed; never edit by hand. After changing `db/`, run `mise run generate` and commit the result (CI's `sqlc diff` fails otherwise)
 - `mise.toml` — pinned tool versions and task definitions
-- `.goreleaser.yml` + `.forgejo/workflows/release.yml` — tag `vX.Y.Z` to publish a Forgejo release (see README, "Releasing")
+- `.forgejo/workflows/` — `ci.yml` (the one full check, on PRs), `release.yml` (tag `vX.Y.Z`: checks the commit's CI status, then GoReleaser publishes a Forgejo release), `security.yml` (nightly govulncheck); see README, "Releasing"
 - `.env` — local config (copy from `.env.example`; holds `DB_URL`, `DISCORD_TOKEN`)
 
 ## Common tasks

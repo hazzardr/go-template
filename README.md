@@ -13,18 +13,36 @@ mise run run
 
 ## Releasing
 
-Pushing a `v*` tag runs `.forgejo/workflows/release.yml`, which tests the code
-and publishes a Forgejo release with GoReleaser. It authenticates with the
-job's built-in token, so the repo needs no Actions secret for it.
+CI runs once per change, on the PR, and the tag only releases:
+
+- `.forgejo/workflows/ci.yml` runs on every PR: build, test, `sqlc diff`
+  (the committed `generated/` must match `db/`), `goreleaser check`,
+  golangci-lint and govulncheck, as one job.
+- `main` is protected: the `CI / Check (pull_request)` check must pass, an
+  outdated PR can't merge, merges are fast-forward only, and nobody pushes to
+  `main` directly. So main's head is always a commit that passed CI, and
+  nothing re-runs on the merge.
+- Pushing a `v*` tag runs `release.yml`. It checks that the tagged commit has a
+  green CI status (so tag from main), re-runs govulncheck, then publishes a
+  Forgejo release with GoReleaser using the job's built-in token (no Actions
+  secret needed).
+- `security.yml` runs govulncheck against main nightly.
+- Every job runs in `localhost/brihome-go-ci:1.27`, a job image with Go
+  preinstalled that `brian/hosted` builds on the runner host. Keep its Go
+  minor in step with `go.mod` and `mise.toml`.
 
 One-time setup per repo created from this template:
 
 1. Replace `go-template` everywhere, including `project_name` and
    `release.gitea.name` in `.goreleaser.yml`.
-2. Check the config: `mise run release:check`, and `mise run release:snapshot`
+2. Apply the repo settings above. Generating from the template copies the
+   branch rule but not the merge styles, so from `brian/hosted` run
+   `mise run forgejo/repo-settings <owner>/<repo>`.
+3. Check the config: `mise run release:check`, and `mise run release:snapshot`
    to build the archives into `dist/` without publishing.
 
-Then `git tag v0.1.0 && git push origin v0.1.0`.
+Then open a PR, merge it once CI passes, and
+`git tag v0.1.0 && git push origin v0.1.0` on main.
 
 ## Deploying
 
