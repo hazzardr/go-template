@@ -37,7 +37,9 @@ One-time setup per repo created from this template:
    `release.gitea.name` in `.goreleaser.yml`.
 2. Apply the repo settings above. Generating from the template copies the
    branch rule but not the merge styles, so from `brian/hosted` run
-   `mise run forgejo/repo-settings <owner>/<repo>`.
+   `mise run forgejo/repo-settings <owner>/<repo>`. It also creates the
+   `claude` fork that agents open PRs from (`AGENTS.md`, "Git and pull
+   requests").
 3. Check the config: `mise run release:check`, and `mise run release:snapshot`
    to build the archives into `dist/` without publishing.
 

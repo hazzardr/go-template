@@ -20,6 +20,45 @@ information relevant to the problem or query, then proceed.
   `mise run lint`. Lint must pass with 0 issues.
 - **Commits**: use Conventional Commits (`feat:`, `fix:`, `chore:`, ...).
 
+## Git and pull requests
+
+Agents work as the `claude` Forgejo account, which has read access to
+`brian/<repo>` and nothing more. It pushes branches to its own fork and opens
+PRs from there. `main` only changes through a PR that passed CI.
+
+- **Remotes.** Add these once per clone if they're missing (`git remote -v`).
+  `code-claude` is the SSH host alias for claude's key.
+
+  ```bash
+  git remote add claude git@code-claude:claude/<repo>.git
+  git remote add claude-upstream git@code-claude:brian/<repo>.git   # fetch only
+  git remote set-url --push claude-upstream DISABLED-use-the-claude-remote
+  ```
+
+  `origin` is brian's remote, with brian's key: never push to it.
+- **No fork yet?** `mise run forgejo/repo-settings brian/<repo>` in
+  `brian/hosted` creates it, or
+  `tea repos fork --login brihome-claude --repo brian/<repo>`.
+- **A change, start to finish:**
+
+  ```bash
+  git fetch claude-upstream
+  git switch -c feat/<name> claude-upstream/main
+  # ...commit (Conventional Commits)...
+  git push -u claude feat/<name>
+  tea pr create --login brihome-claude --repo brian/<repo> \
+    --head claude:feat/<name> --base main --title "..." --description "..."
+  ```
+
+- **Updating a PR.** `main` merges fast-forward only and blocks outdated PRs,
+  so rebase onto `claude-upstream/main` and
+  `git push --force-with-lease claude <branch>`.
+- Use `tea --login brihome-claude` for Forgejo (PRs, CI status via
+  `tea api`), not `gh`.
+- Docs that go with a change belong in the same PR; don't open a separate one
+  for them.
+- Commit and push only when asked to.
+
 ## Tech stack
 
 | Concern | Tool |
